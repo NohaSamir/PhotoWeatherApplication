@@ -11,5 +11,7 @@ App Features
 - Share or delete photo
 - Get current weather by By geographic coordinates using openweathermap : https://openweathermap.org/current
 
+![alt text](https://drive.google.com/file/d/1WzWixOIRj0NcxOoRpHgz736ywVHU5Oz1/view?usp=sharing)
+
 [![Watch the video](https://drive.google.com/file/d/1WzWixOIRj0NcxOoRpHgz736ywVHU5Oz1/view?usp=sharing)](https://drive.google.com/file/d/1X3Hvr-paOGelWG0tWdxmvdP7BSlJsvwN/view?usp=sharing)
 
