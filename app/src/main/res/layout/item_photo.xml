@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?><!--ToDO Edit Layout-->
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <data>
+
+        <variable
+            name="path"
+            type="String" />
+    </data>
+
+    <ImageView
+        android:id="@+id/imageView"
+        loadImage="@{path}"
+        android:layout_marginTop="4dp"
+        android:layout_marginRight="4dp"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/card_height"
+        android:contentDescription="@string/photo"
+        android:scaleType="centerCrop"
+        tools:srcCompat="@tools:sample/avatars" />
+</layout>

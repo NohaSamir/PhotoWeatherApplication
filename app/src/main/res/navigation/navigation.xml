@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/navigation"
+    app:startDestination="@id/galleryFragment">
+
+    <fragment
+        android:id="@+id/galleryFragment"
+        android:name="com.example.photoweather.presentation.gallery.GalleryFragment"
+        android:label="@string/gallery"
+        tools:layout="@layout/fragment_gallery" >
+
+        <action
+            android:id="@+id/action_galleryFragment_to_photoDetailsFragment"
+            app:destination="@id/photoDetailsFragment" />
+        <action
+            android:id="@+id/action_galleryFragment_to_newPhotoFragment"
+            app:destination="@id/newPhotoFragment" />
+    </fragment>
+    <fragment
+        android:id="@+id/photoDetailsFragment"
+        android:name="com.example.photoweather.presentation.photodetails.PhotoDetailsFragment"
+        tools:layout="@layout/fragment_photo_details" >
+        <argument
+            android:name="photo"
+            app:argType="com.example.photoweather.domain.model.Photo" />
+    </fragment>
+    <fragment
+        android:id="@+id/newPhotoFragment"
+        android:name="com.example.photoweather.presentation.addphoto.NewPhotoFragment"
+        android:label="@string/add_photo"
+        tools:layout="@layout/fragment_new_photo" >
+        <argument
+            android:name="photoPath"
+            app:argType="string" />
+        <action
+            android:id="@+id/action_newPhotoFragment_to_photoDetailsFragment"
+            app:destination="@id/photoDetailsFragment"
+            app:popUpTo="@id/galleryFragment"
+            app:popUpToInclusive="false" />
+        <argument
+            android:name="imageProvider"
+            app:argType="integer" />
+    </fragment>
+
+
+</navigation>

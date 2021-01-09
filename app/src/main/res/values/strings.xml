@@ -1,0 +1,17 @@
+<resources>
+    <string name="app_name">PhotoWeather</string>
+    <string name="gallery">Gallery</string>
+    <string name="photo_details">Photo details</string>
+    <string name="retry">Retry</string>
+    <string name="image">image</string>
+    <string name="photo">photo</string>
+    <string name="add_photo">Add photo</string>
+    <string name="camera">Camera</string>
+    <string name="camera_and_location_rationale">Enable app permission to be able to add new photo</string>
+    <string name="celsius">°C</string>
+    <string name="thermometer">Thermometer</string>
+    <string name="save">Save</string>
+    <string name="error_try_again">Something went wrong, Please, try again.</string>
+    <string name="not_implemented">Not implemented yet</string>
+    <string name="add_new_photos">Add new photos</string>
+</resources>
