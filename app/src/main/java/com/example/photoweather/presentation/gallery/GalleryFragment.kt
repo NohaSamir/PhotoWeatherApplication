@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.photoweather.R
 import com.example.photoweather.data.source.repository.galleryRepository
@@ -20,6 +21,8 @@ import com.example.photoweather.utils.PermissionConstants.PERMISSIONS
 import com.example.photoweather.utils.PermissionConstants.REQUEST_CODE_PERMISSION
 import com.example.photoweather.utils.showToast
 import com.github.dhaval2404.imagepicker.ImagePicker
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
 import pub.devrel.easypermissions.EasyPermissions
 
 
@@ -28,12 +31,14 @@ import pub.devrel.easypermissions.EasyPermissions
  *  1- testing
  *  6- add use cases
  */
+@ExperimentalCoroutinesApi
 class GalleryFragment : Fragment(), EasyPermissions.PermissionCallbacks,
     EasyPermissions.RationaleCallbacks {
 
-    private lateinit var adapter: ListAdapter
+    private lateinit var adapter: GalleryAdapter
     private lateinit var binding: FragmentGalleryBinding
     private lateinit var imageProvider: ImageProvider
+    private val fragment :GalleryFragment by lazy { this }
 
     /**
      * Lazily initialize our [GalleryViewModel].
@@ -46,6 +51,7 @@ class GalleryFragment : Fragment(), EasyPermissions.PermissionCallbacks,
      * Inflates the layout with Data Binding, sets its lifecycle owner to the ListViewModel
      * to enable Data Binding to observe LiveData, and sets up the RecyclerView with an adapter.
      */
+    @ExperimentalCoroutinesApi
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -57,62 +63,55 @@ class GalleryFragment : Fragment(), EasyPermissions.PermissionCallbacks,
         binding.viewModel = viewModel
 
         /*Initialize adapter and handle on item click */
-        adapter = ListAdapter(object : OnClickListener {
+        adapter = GalleryAdapter(object : OnClickListener {
             override fun onClick(photo: Photo) {
-                findNavController().navigate(
-                    GalleryFragmentDirections.actionGalleryFragmentToPhotoDetailsFragment(
-                        photo
-                    )
-                )
+                viewModel.onPhotoSelected(photo)
             }
         })
         binding.recycler.adapter = adapter
 
-        viewModel.stateLiveData.observe(viewLifecycleOwner, {
+        lifecycleScope.launchWhenStarted {
+            viewModel.stateFlow.collect { viewState ->
 
-            if (it.checkPermissions)
-                checkAllPermission()
+                if (viewState.checkPermissions)
+                    checkAllPermission()
 
-            if (it.permissionError.isNotBlank()) {
-                showToast(context, it.permissionError)
-                viewModel.onPermissionErrorDisplayed()
-            }
+                if (viewState.permissionError.isNotBlank()) {
+                    showToast(context, viewState.permissionError)
+                    viewModel.onPermissionErrorDisplayed()
+                }
 
-            if (it.openCamera) {
-                imageProvider = ImageProvider.CAMERA
-                context?.let {
-                    ImagePicker.with(this)
-                        .cameraOnly()
-                        .saveDir(FileOperations.getAppFolder(it))
-                        .start()
+                if (viewState.openCamera) {
+                    imageProvider = ImageProvider.CAMERA
+                    context?.let {
+                        ImagePicker.with(fragment)
+                            .cameraOnly()
+                            .saveDir(FileOperations.getAppFolder(it))
+                            .start()
+                    }
+                }
+
+                if (viewState.openGallery) {
+                    imageProvider = ImageProvider.GALLERY
+                    context?.let {
+                        ImagePicker.with(fragment)
+                            .galleryOnly()
+                            .start()
+                    }
+                }
+
+                if (viewState.newPhotoPath.isNotBlank()) {
+                    openPhotoDetails(viewState.newPhotoPath)
+                    viewModel.onNavigateToPhotoDetails()
+                }
+
+                viewState.selectedPhoto?.let {
+                    openPhotoDetails(it)
+                    viewModel.onNavigateToPhotoDetails()
                 }
             }
+        }
 
-            if (it.openGallery) {
-                imageProvider = ImageProvider.GALLERY
-                context?.let {
-                    ImagePicker.with(this)
-                        .galleryOnly()
-                        .start()
-                }
-            }
-
-            if (it.photoPath.isNotBlank()) {
-                openPhotoDetails(it.photoPath)
-                viewModel.onNewWindowOpened()
-            }
-        })
-
-
-        viewModel.photos.observe(viewLifecycleOwner, {
-            if (it.isEmpty())
-                viewModel.onNoPhotoAvailable()
-            else {
-                adapter.submitList(it)
-                viewModel.onPhotoAvailable()
-            }
-
-        })
         return binding.root
     }
 
@@ -139,6 +138,15 @@ class GalleryFragment : Fragment(), EasyPermissions.PermissionCallbacks,
                 )
             }
         }
+    }
+
+    private fun openPhotoDetails(photo: Photo)
+    {
+        findNavController().navigate(
+            GalleryFragmentDirections.actionGalleryFragmentToPhotoDetailsFragment(
+                photo
+            )
+        )
     }
 
     override fun onRequestPermissionsResult(

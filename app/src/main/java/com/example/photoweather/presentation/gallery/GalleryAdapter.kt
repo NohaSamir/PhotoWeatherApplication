@@ -8,7 +8,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.photoweather.databinding.ItemPhotoBinding
 import com.example.photoweather.domain.model.Photo
 
-class ListAdapter(private val listener: OnClickListener) :
+class GalleryAdapter(private val listener: OnClickListener? = null) :
     ListAdapter<Photo, GalleryViewHolder>(DataDiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GalleryViewHolder {
@@ -25,12 +25,14 @@ class ListAdapter(private val listener: OnClickListener) :
 class GalleryViewHolder(private var binding: ItemPhotoBinding) :
     RecyclerView.ViewHolder(binding.root) {
 
-    fun bind(photo: Photo, listener: OnClickListener) {
+    fun bind(photo: Photo, listener: OnClickListener?) {
         binding.path = photo.photoPath
         binding.executePendingBindings()
 
-        itemView.setOnClickListener {
-            listener.onClick(photo)
+        listener?.let {
+            itemView.setOnClickListener {
+                listener.onClick(photo)
+            }
         }
     }
 

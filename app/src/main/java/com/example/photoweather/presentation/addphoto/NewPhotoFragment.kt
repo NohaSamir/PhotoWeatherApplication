@@ -23,11 +23,10 @@ import com.example.photoweather.domain.model.Photo
 import com.example.photoweather.utils.LocationManager
 import com.example.photoweather.utils.LocationManagerInteraction
 import com.example.photoweather.utils.showToast
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
+import kotlinx.coroutines.flow.collect
 
-
+@ExperimentalCoroutinesApi
 class NewPhotoFragment : Fragment(), LocationManagerInteraction {
 
     private lateinit var binding: FragmentNewPhotoBinding
@@ -73,23 +72,25 @@ class NewPhotoFragment : Fragment(), LocationManagerInteraction {
             }
         }
 
-        viewModel.stateLiveData.observe(viewLifecycleOwner, {
-            if (it.takeScreenShot) {
-                val bitmap = screenShot(binding.imageContainer)
-                viewModel.onScreenShotFinish(bitmap)
-            }
+        lifecycleScope.launchWhenStarted {
+            viewModel.stateFlow.collect { viewState ->
+                if (viewState.takeScreenShot) {
+                    val bitmap = screenShot(binding.imageContainer)
+                    viewModel.onScreenShotFinish(bitmap)
+                }
 
-            if (it.error != null) {
-                showToast(context, it.error)
-                viewModel.onErrorMsgDisplayed()
-            }
+                if (viewState.error != null) {
+                    showToast(context, viewState.error)
+                    viewModel.onErrorMsgDisplayed()
+                }
 
-            val newPhoto = it.newPhoto
-            if (it.navigateToPhotoDetails && newPhoto != null) {
-                viewModel.onNavigateSuccess()
-                navigateToPhotoDetails(newPhoto)
+                val newPhoto = viewState.newPhoto
+                if (viewState.navigateToPhotoDetails && newPhoto != null) {
+                    viewModel.onNavigateSuccess()
+                    navigateToPhotoDetails(newPhoto)
+                }
             }
-        })
+        }
 
         setUpOnWeatherViewDrag()
         return binding.root

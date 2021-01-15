@@ -2,21 +2,37 @@ package com.example.photoweather.presentation.gallery
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.viewModelScope
+import com.example.photoweather.domain.model.Photo
 import com.example.photoweather.domain.repository.GalleryRepository
 import com.example.photoweather.presentation.base.BaseAction
 import com.example.photoweather.presentation.base.BaseViewModel
 import com.example.photoweather.presentation.base.BaseViewState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
-
+@ExperimentalCoroutinesApi
 class GalleryViewModel(private val repository: GalleryRepository) :
     BaseViewModel<GalleryViewModel.ViewState, GalleryViewModel.ViewAction>(
         ViewState()
     ) {
 
-    val photos = repository.getPhotos()
 
-    fun onNoPhotoAvailable() = sendAction(ViewAction.OnNoPhotoAvailable)
-    fun onPhotoAvailable() = sendAction(ViewAction.OnPhotoAvailable)
+    init {
+        loadData()
+    }
+
+    override fun loadData() {
+        viewModelScope.launch {
+            repository.getPhotos().collect {
+                if (it.isNotEmpty())
+                    sendAction(ViewAction.OnPhotoAvailable(it))
+                else
+                    sendAction(ViewAction.OnNoPhotoAvailable)
+            }
+        }
+    }
 
     fun onAddButtonClick() = sendAction(ViewAction.OnAddPhotoClick)
     fun onGalleryButtonClick() = sendAction(ViewAction.OnGalleryButtonClick)
@@ -25,13 +41,14 @@ class GalleryViewModel(private val repository: GalleryRepository) :
     fun setPermissionResult(granted: Boolean) = sendAction(ViewAction.OnPermissionsResult(granted))
     fun onPermissionErrorDisplayed() = sendAction(ViewAction.OnPermissionErrorDisplayed)
 
-    fun onNewPhotoSuccess(photoPath: String) =
-        sendAction(ViewAction.OnAddNewPhotoSuccess(photoPath))
+    fun onNewPhotoSuccess(newPhotoPath: String) =
+        sendAction(ViewAction.OnAddNewPhotoSuccess(newPhotoPath))
 
     fun onNewPhotoCanceled() = sendAction(ViewAction.OnAddNewPhotoCanceled)
     fun onNewPhotoError(error: String) = sendAction(ViewAction.OnAddNewPhotoError(error))
 
-    fun onNewWindowOpened() = sendAction(ViewAction.OnNewWindowOpened)
+    fun onPhotoSelected(photo: Photo) = sendAction(ViewAction.OnPhotoSelected(photo))
+    fun onNavigateToPhotoDetails() = sendAction(ViewAction.OnNavigateToNewWindow)
 
 
     /**
@@ -49,6 +66,7 @@ class GalleryViewModel(private val repository: GalleryRepository) :
 
     data class ViewState(
         var isLoading: Boolean = true,
+        var photos: List<Photo>? = null,
 
         var isGalleryButtonVisible: Boolean = false,
         var isCameraButtonVisible: Boolean = false,
@@ -62,13 +80,14 @@ class GalleryViewModel(private val repository: GalleryRepository) :
         var openCamera: Boolean = false,
         var openGallery: Boolean = false,
 
-        var photoPath: String = "",
+        var newPhotoPath: String = "",
+        var selectedPhoto: Photo? = null
 
-        ) : BaseViewState
+    ) : BaseViewState
 
     sealed class ViewAction : BaseAction {
         object OnNoPhotoAvailable : ViewAction()
-        object OnPhotoAvailable : ViewAction()
+        class OnPhotoAvailable(val photos: List<Photo>) : ViewAction()
 
         object OnAddPhotoClick : ViewAction()
         object OnGalleryButtonClick : ViewAction()
@@ -81,7 +100,8 @@ class GalleryViewModel(private val repository: GalleryRepository) :
         class OnAddNewPhotoSuccess(val photoPath: String) : ViewAction()
         class OnAddNewPhotoError(val error: String) : ViewAction()
 
-        object OnNewWindowOpened : ViewAction()
+        class OnPhotoSelected(val selectedPhoto: Photo) : ViewAction()
+        object OnNavigateToNewWindow : ViewAction()
     }
 
     override fun onReduceState(viewAction: ViewAction): ViewState =
@@ -142,7 +162,7 @@ class GalleryViewModel(private val repository: GalleryRepository) :
                 state.copy(
                     openGallery = false,
                     openCamera = false,
-                    photoPath = viewAction.photoPath
+                    newPhotoPath = viewAction.photoPath
                 )
 
             is ViewAction.OnAddNewPhotoCanceled ->
@@ -151,12 +171,16 @@ class GalleryViewModel(private val repository: GalleryRepository) :
             is ViewAction.OnAddNewPhotoError ->
                 state.copy(openGallery = false, openCamera = false)
 
-            is ViewAction.OnNewWindowOpened ->
-                state.copy(photoPath = "")
+            is ViewAction.OnNavigateToNewWindow ->
+                state.copy(newPhotoPath = "", selectedPhoto = null)
 
-            ViewAction.OnPhotoAvailable -> state.copy(
+            is ViewAction.OnPhotoAvailable -> state.copy(
                 isLoading = false,
-                isPhotoListEmpty = false
+                isPhotoListEmpty = false,
+                photos = viewAction.photos
             )
+
+            is ViewAction.OnPhotoSelected ->
+                state.copy(selectedPhoto = viewAction.selectedPhoto)
         }
 }

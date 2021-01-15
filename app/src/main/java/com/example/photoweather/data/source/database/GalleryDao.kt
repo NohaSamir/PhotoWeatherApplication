@@ -3,12 +3,13 @@ package com.example.photoweather.data.source.database
 import androidx.lifecycle.LiveData
 import androidx.room.*
 import com.example.photoweather.data.source.database.models.PhotoDB
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface GalleryDao {
 
     @Query("Select * from PhotoDB ORDER BY id DESC")
-    fun getPhotos(): LiveData<List<PhotoDB>>
+    fun getPhotos(): Flow<List<PhotoDB>>
 
     @Query("Select * from PhotoDB where id = :id ")
     suspend fun getPhoto(id: String): PhotoDB

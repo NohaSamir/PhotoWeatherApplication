@@ -1,8 +1,6 @@
 package com.example.photoweather.data.source.repository
 
 import android.graphics.Bitmap
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.Transformations
 import com.example.photoweather.MyApp
 import com.example.photoweather.data.source.database.AppDatabase
 import com.example.photoweather.data.source.database.GalleryDao
@@ -14,6 +12,9 @@ import com.example.photoweather.domain.repository.GalleryRepository
 import com.example.photoweather.utils.FileOperations
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.withContext
 
 
@@ -26,12 +27,9 @@ class GalleryRepositoryImpl(
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : GalleryRepository {
 
-    override fun getPhotos(): LiveData<List<Photo>> =
-        Transformations.map(galleryDao.getPhotos()) { list ->
-            list.map { photoDB ->
-                photoDB.toDomainModel()
-            }
-        }
+    override fun getPhotos(): Flow<List<Photo>> = galleryDao.getPhotos()
+        .map { list -> list.map { it.toDomainModel() } }
+        .flowOn(dispatcher)
 
 
     override suspend fun saveNewPhoto(

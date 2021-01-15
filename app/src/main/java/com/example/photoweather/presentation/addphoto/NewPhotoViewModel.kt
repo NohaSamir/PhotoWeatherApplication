@@ -14,8 +14,10 @@ import com.example.photoweather.domain.repository.WeatherRepository
 import com.example.photoweather.presentation.base.BaseAction
 import com.example.photoweather.presentation.base.BaseViewModel
 import com.example.photoweather.presentation.base.BaseViewState
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 
+@ExperimentalCoroutinesApi
 class NewPhotoViewModel(
     private val photoPath: String,
     private val imageProvider: ImageProvider,
