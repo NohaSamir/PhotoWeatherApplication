@@ -12,16 +12,16 @@ App Featu
 - Get current weather by By geographic coordinates using openweathermap : https://openweathermap.org/current
 
 Developed with
-1- Kotlin
-2- MVVM & MVI architecture
-3- Android architecture components
-4- Navigation Jetpack
-5- Room Database
-6- Single activity
-7- dataBinding
-8- Coroutines
-9- Retrofit
-10- Repository pattern
+- Kotlin
+- MVVM & MVI architecture
+- Android architecture components
+- Navigation Jetpack
+- Room Database
+- Single activity
+- dataBinding
+- Coroutines
+- Retrofit
+- Repository pattern
 
 [![Watch the video]()](https://drive.google.com/file/d/1X3Hvr-paOGelWG0tWdxmvdP7BSlJsvwN/view?usp=sharing) 
 
