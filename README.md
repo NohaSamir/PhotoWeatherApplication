@@ -1,8 +1,8 @@
-# PhotoWeatherApplication
+# Photo Weather Application
 
-A “Photo Weather” application lets users take a photo, add current weather information (e.g. place name, temperature, weather condition, …) as a banner overlay on top of the photo, and finally, share it on Facebook or Twitter ...etc.
+A **“Photo Weather”** application lets users take a photo, add current weather information (e.g. place name, temperature, weather condition, …) as a banner overlay on top of the photo, and finally, share it on Facebook or Twitter ...etc.
 
-App Featu
+## App Features:
 - Display Photos list
 - Pick new photo using camera and gallery
 - Drag weather information layout up or down
@@ -11,7 +11,7 @@ App Featu
 - Share or delete photo
 - Get current weather by By geographic coordinates using openweathermap : https://openweathermap.org/current
 
-Developed with
+## Developed with
 - Kotlin
 - MVVM & MVI architecture
 - Android architecture components
